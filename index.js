@@ -43,6 +43,12 @@ module.exports = function(babel) {
     return t.isJSXExpressionContainer(value) && isJoinExpression(value);
   }
 
+  function isArrayLitera(value) {
+    return (
+      t.isJSXExpressionContainer(value) && t.isArrayExpression(value.expression)
+    );
+  }
+
   function generateRequire(name) {
     var require = t.callExpression(t.identifier("require"), [
       t.stringLiteral("react-native-dynamic-style-processor")
@@ -70,6 +76,12 @@ module.exports = function(babel) {
         expression.arguments = expression.arguments.map(a =>
           generateProcessCall(a, state)
         );
+      }
+    }
+
+    if (t.isLogicalExpression(expression)) {
+      if (t.isUnaryExpression(expression.left)) {
+        expression.right = generateProcessCall(expression.right, state);
       }
     }
 
@@ -118,7 +130,7 @@ module.exports = function(babel) {
   }
 
   return {
-    name: "react-native-classname-to-dynamic-style",
+    name: "react-native-classname-to-dynamic-style-extend",
     visitor: {
       Program: {
         enter(path, state) {
@@ -156,12 +168,12 @@ module.exports = function(babel) {
           var isSameElement =
             css && style && css.parentPath.node !== style.parentPath.node;
 
-          if (isArrayWithJoin(css.node.value)) {
-            var elements = css.node.value.expression.callee.object.elements;
+          if (isArrayLitera(css.node.value)) {
+            var elements = css.node.value.expression.elements;
             if (css && style) {
               style.node.value = t.arrayExpression(
                 [].concat(
-                  elements.map(e => generateProcessCall(e, state)),
+                  elements.map(e => transformExpressions(e, state)),
                   style.node.value.expression
                 )
               );
@@ -171,7 +183,25 @@ module.exports = function(babel) {
               style = css;
               style.node.name.name = "style";
               style.node.value = t.arrayExpression(
-                elements.map(e => generateProcessCall(e, state))
+                elements.map(e => transformExpressions(e, state))
+              );
+            }
+          } else if (isArrayWithJoin(css.node.value)) {
+            var elements = css.node.value.expression.callee.object.elements;
+            if (css && style) {
+              style.node.value = t.arrayExpression(
+                [].concat(
+                  elements.map(e => transformExpressions(e, state)),
+                  style.node.value.expression
+                )
+              );
+              css.replaceWith(style);
+              style.remove();
+            } else {
+              style = css;
+              style.node.name.name = "style";
+              style.node.value = t.arrayExpression(
+                elements.map(e => transformExpressions(e, state))
               );
             }
           } else if (isSameElement || style === null) {
