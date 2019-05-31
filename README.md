@@ -240,6 +240,8 @@ var _reactNativeDynamicStyleProcessor = require("react-native-dynamic-style-proc
 />;
 ```
 
+---
+
 ```jsx
 <Text className={[styles.class1, isTrue ? styles.class2 : styles.class3]} />
 ```
