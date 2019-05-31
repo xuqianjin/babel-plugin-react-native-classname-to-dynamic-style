@@ -80,9 +80,7 @@ module.exports = function(babel) {
     }
 
     if (t.isLogicalExpression(expression)) {
-      if (t.isUnaryExpression(expression.left)) {
-        expression.right = generateProcessCall(expression.right, state);
-      }
+      expression.right = generateProcessCall(expression.right, state);
     }
 
     if (t.isConditionalExpression(expression)) {
