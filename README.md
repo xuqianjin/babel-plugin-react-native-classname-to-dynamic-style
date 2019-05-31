@@ -198,7 +198,7 @@ var _reactNativeDynamicStyleProcessor = require("react-native-dynamic-style-proc
 />;
 ```
 
-#### Using array
+## Using array
 
 Example:
 
@@ -219,7 +219,7 @@ var _reactNativeDynamicStyleProcessor = require("react-native-dynamic-style-proc
 />;
 ```
 
-#### Using array operator
+## Using array operator
 
 Example:
 
